@@ -1,0 +1,29 @@
+{
+  "name": "nodejs-sequelize",
+  "version": "1.0.0",
+  "description": "site to find some code gigs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "keywords": [
+    "nodejs",
+    "sequelize",
+    "postgres"
+  ],
+  "author": "yoga adhipratama",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "express-handlebars": "^6.0.2",
+    "pg": "^8.7.1",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.12.0-alpha.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
+}
