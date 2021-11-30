@@ -2,23 +2,21 @@ const express = require("express");
 const exphbs = require("express-handlebars");
 const bodyParser = require("body-parser");
 const path = require("path");
-require('dotenv').config();
-const { Sequelize } = require('sequelize');
+const db = require("./config/database.js");
 
+//import routes=========================================
 const app = express();
-
-//Database connection =======================
-const db = new Sequelize("codegig", "postgres", process.env.db_pass, {
-  host: "localhost",
-  dialect: "postgres" /* one of 'mysql' | 'mariadb' |  | 'mssql' */,
-});
+const gigsRoute = require("./routes/gigs.js");
 
 //DB test if connected
 db.authenticate()
   .then(() => console.log("DB connected"))
   .catch((err) => console.log(err));
 
-//Route =====================================
+//routes=================================
+app.use("/gigs", gigsRoute);
+
+//tHome Route=====================================
 app.get("/", (req, res) => {
   res.send("INDEX");
 });
