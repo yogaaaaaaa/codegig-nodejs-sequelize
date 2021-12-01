@@ -1,5 +1,5 @@
 const express = require("express");
-const exphbs = require("express-handlebars");
+const {engine} = require("express-handlebars");
 const bodyParser = require("body-parser");
 const path = require("path");
 const db = require("./config/database.js");
@@ -15,6 +15,10 @@ db.authenticate()
 
 //routes=================================
 app.use("/gigs", gigsRoute);
+
+//Handlebars================================
+app.engine("handlebars", engine({ defaultLayout: "main" }));
+app.set("view engine", "handlebars");
 
 //tHome Route=====================================
 app.get("/", (req, res) => {
