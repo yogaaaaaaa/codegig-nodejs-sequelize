@@ -2,42 +2,82 @@ const express = require("express");
 const router = express.Router();
 const db = require("../config/database.js");
 const Gig = require("../models/Gig").Gig;
+let bodyParser = require("body-parser");
+const Sequelize = require("sequelize");
+const Op = Sequelize.Op;
+
+let urlencodedParser = bodyParser.urlencoded({ extended: false });
 
 //Get gig list
 router.get("/", (req, res) =>
-  Gig.findAll()
+  Gig.findAll({ raw: true })
     .then((gigs) => {
-      console.log(gigs);
-      res.sendStatus(200);
+      res.render("gigs", { gigs });
     })
     .catch((err) => console.log(err))
 );
 
+//display form add gigs
+router.get("/add", (req, res) => res.render("add"));
+
 //Add a gig
-router.get("/add", (req, res) => {
-  const data = {
-    title: "Wordpress Developer",
-    technologies: "wordpress, html, Css, javascript",
-    budget: "200000",
-    description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-    contact_email: "braun@gmail.com",
-  };
+router.post("/add", urlencodedParser, (req, res) => {
+  let { title, technologies, description, budget, contact_email } = req.body;
+  let errors = [];
 
-  //   let {...spreadedData} = data;
-  let { title, technologies, description, budget, contact_email } = data;
+  //checking if empty fields
+  if (!title) {
+    errors.push({ text: "Tambahkan title..." });
+  }
+  if (!technologies) {
+    errors.push({ text: "Tambahkan teknologi yang digunakan..." });
+  }
+  if (!description) {
+    errors.push({ text: "Tambahkan deskripsi..." });
+  }
+  if (!contact_email) {
+    errors.push({ text: "Tambahkan kontak email..." });
+  }
 
-  //insert into table
-  Gig.create({
-    //   spreadedData
-    title: title,
-    technologies: technologies,
-    description: description,
-    budget: budget,
-    contact_email: contact_email,
-  })
-    .then((gig) => res.redirect("/gigs"))
-    .catch((err) => console.log(err));
+  //check for errors
+  if (errors.length > 0) {
+    res.render("add", {
+      errors,
+      title,
+      technologies,
+      description,
+      budget,
+      contact_email,
+    });
+  } else {
+    if (!budget) {
+      budget = "Unknown";
+    } else {
+      budget = `Rp.${budget}`;
+    }
+
+    //Make lowercase and remove space after comma
+    technologies = technologies.toLowerCase().replace(/, /g, ",");
+    //insert into table
+    Gig.create({
+      title,
+      technologies,
+      description,
+      budget,
+      contact_email,
+    })
+      .then((gig) => res.redirect("/gigs"))
+      .catch((err) => console.log(err));
+  }
+});
+
+//gigs search
+router.get("/search", (req, res) => {
+  const { term } = req.query;
+
+  Gig.findAll({ raw:true, where: { technologies: { [Op.like]: "%" + term + "%" } } })
+  .then(gigs => res.render('gigs', {gigs}))
+  .catch(err => console.log(err));
 });
 
 module.exports = router;
