@@ -73,7 +73,9 @@ router.post("/add", urlencodedParser, (req, res) => {
 
 //gigs search
 router.get("/search", (req, res) => {
-  const { term } = req.query;
+  let { term } = req.query;
+
+  term = term.lowerCase();
 
   Gig.findAll({ raw:true, where: { technologies: { [Op.like]: "%" + term + "%" } } })
   .then(gigs => res.render('gigs', {gigs}))
